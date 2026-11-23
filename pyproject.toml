@@ -4,33 +4,30 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "bug-agent"
+name = "pathguard"
 version = "0.1.0"
 description = "PathGuard - Execution-verified AI bug fixing agent"
 requires-python = ">=3.11,<3.13"
 dependencies = [
-    "langgraph",
-    "langgraph-checkpoint-sqlite",
     "pydantic>=2",
-    "fastapi",
-    "uvicorn",
-   "mcp>=1.0,<2.0",
-    "chromadb",
-    "sentence-transformers",
-    "rank-bm25",
-    "google-genai",
-    "python-dotenv",
-    "typer",
-    "streamlit",
-    "pytest",
-    "pytest-timeout",
+    "mcp>=1.0,<2.0",
+    "google-genai>=1.0",
+    "python-dotenv>=1.0",
+    "typer>=0.12",
 ]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-timeout>=2.3"]
+
+[project.scripts]
+pathguard = "core.cli:app"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["agent*", "rag*", "mcp_servers*", "evals*", "api*", "ui*"]
+include = ["agent*", "core*", "mcp_servers*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-ra"
+addopts = "-ra --strict-markers"
+markers = ["docker: requires Docker and a built pathguard-runner image"]
