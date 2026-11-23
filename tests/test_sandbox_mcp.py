@@ -1,4 +1,3 @@
-from mcp_servers.sandbox_mcp import validate_test_file
 import subprocess
 
 import pytest
@@ -6,8 +5,10 @@ import pytest
 from mcp_servers.sandbox_mcp import (
     TARGET_REPOS,
     validate_repo_path,
+    validate_test_file,
     run_docker,
 )
+from core.process import ProcessResult
 
 
 def test_valid_repository_path():
@@ -32,14 +33,11 @@ def test_rejects_nonexistent_repository():
 
 
 def test_run_docker_returns_structured_result(monkeypatch):
-    expected = subprocess.CompletedProcess(
-        args=[],
-        returncode=0,
-        stdout="2 passed",
-        stderr="",
-    )
+    expected = ProcessResult(returncode=0, stdout=b"2 passed", stderr=b"")
 
     def fake_run(command, **kwargs):
+        if command[1:3] == ["rm", "-f"]:
+            return ProcessResult(returncode=1, stdout=b"", stderr=b"")
         assert "docker" in command[0]
         assert "--network" in command
         assert "none" in command
@@ -47,7 +45,7 @@ def test_run_docker_returns_structured_result(monkeypatch):
         assert "--read-only" in command
         return expected
 
-    monkeypatch.setattr(subprocess, "run", fake_run)
+    monkeypatch.setattr("core.sandbox.run_bounded", fake_run)
 
     result = run_docker(
         str(TARGET_REPOS / "demo"),
@@ -62,14 +60,11 @@ def test_run_docker_returns_structured_result(monkeypatch):
 
 def test_run_docker_reports_timeout(monkeypatch):
     def fake_run(command, **kwargs):
-        raise subprocess.TimeoutExpired(
-            command,
-            timeout=30,
-            output="Running tests",
-            stderr="",
-        )
+        if command[1:3] == ["rm", "-f"]:
+            return ProcessResult(returncode=1, stdout=b"", stderr=b"")
+        return ProcessResult(returncode=None, stdout=b"Running tests", stderr=b"", timed_out=True)
 
-    monkeypatch.setattr(subprocess, "run", fake_run)
+    monkeypatch.setattr("core.sandbox.run_bounded", fake_run)
 
     result = run_docker(
         str(TARGET_REPOS / "demo"),
@@ -78,6 +73,7 @@ def test_run_docker_reports_timeout(monkeypatch):
 
     assert result["success"] is False
     assert result["timed_out"] is True
+    assert result["status"] == "timeout"
 
 
 def test_accepts_valid_test_file():

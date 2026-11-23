@@ -71,3 +71,10 @@ def test_rejects_empty_search_query():
 def test_rejects_invalid_line_range():
     with pytest.raises(ValueError):
         read_file(str(DEMO_REPO), "test_math.py", 10, 1)
+
+
+def test_rejects_environment_and_git_metadata():
+    with pytest.raises(ValueError):
+        read_file(str(DEMO_REPO), ".git/HEAD")
+    with pytest.raises(ValueError):
+        read_file(str(DEMO_REPO), ".env.example")
