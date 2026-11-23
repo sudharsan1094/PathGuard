@@ -14,7 +14,7 @@ dependencies = [
     "pydantic>=2",
     "fastapi",
     "uvicorn",
-    "mcp",
+   "mcp>=1.0,<2.0",
     "chromadb",
     "sentence-transformers",
     "rank-bm25",
