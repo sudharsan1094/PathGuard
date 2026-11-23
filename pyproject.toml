@@ -1,0 +1,36 @@
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bug-agent"
+version = "0.1.0"
+description = "PathGuard - Execution-verified AI bug fixing agent"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "langgraph",
+    "langgraph-checkpoint-sqlite",
+    "pydantic>=2",
+    "fastapi",
+    "uvicorn",
+    "mcp",
+    "chromadb",
+    "sentence-transformers",
+    "rank-bm25",
+    "google-genai",
+    "python-dotenv",
+    "typer",
+    "streamlit",
+    "pytest",
+    "pytest-timeout",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agent*", "rag*", "mcp_servers*", "evals*", "api*", "ui*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra"

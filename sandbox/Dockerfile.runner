@@ -1,0 +1,16 @@
+FROM python:3.12-slim
+
+RUN useradd -m -u 1000 runner
+
+WORKDIR /workspace
+
+ARG EXTRA_REQS=""
+
+RUN pip install --no-cache-dir pytest pytest-timeout ${EXTRA_REQS}
+
+USER runner
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+CMD ["bash"]
